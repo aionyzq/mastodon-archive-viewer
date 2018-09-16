@@ -58,7 +58,7 @@ body { background:#333; background-image: url('header.png'); background-size: co
 * {box-sizing: border-box;}\
 a { color: rgb(150,255,140) }\
 </style>"
-outfile.write("<html><head><title>Mastodon Archive</title><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>")
+outfile.write("<!DOCTYPE html><html><head><title>Mastodon Archive</title><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>")
 outfile.write(styleSheet)
 outfile.write("</head><body>")
 for article in articles:
