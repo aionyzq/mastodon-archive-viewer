@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import json
 from os import path
 with open("outbox.json", "r") as outbox_file:
