@@ -44,7 +44,7 @@ for status in statuses:
 			</article>".format(date, htmlContent, images)
 		articles.append(article)
 
-outfile = open("processed_archive.html", "w+")
+outfile = open("processed_archive.html", "w")
 styleSheet = "<style>\
 .status { width: 54ch; position: relative; min-height: 128px; margin:auto auto 4em auto; border: 1px solid #999; border-radius: 16px; padding:8px; background: rgba(0,0,0,0.75);}\
 .status::before{ content: url('avatar.png'); position: absolute; right: 100%; }\
@@ -58,7 +58,7 @@ body { background:#333; background-image: url('header.png'); background-size: co
 * {box-sizing: border-box;}\
 a { color: rgb(150,255,140) }\
 </style>"
-outfile.write("<html><head>")
+outfile.write("<html><head><title>Mastodon Archive</title><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>")
 outfile.write(styleSheet)
 outfile.write("</head><body>")
 for article in articles:
