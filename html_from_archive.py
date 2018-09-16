@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
 import json
 from os import path
 with open("outbox.json", "r") as outbox_file:
 	outbox = json.loads(outbox_file.read())
+with open("actor.json", "r") as actor_file:
+	actor = json.loads(actor_file.read())
 #map the outbox down to the actual objects
 statuses = [status.get("object") for status in outbox.get("orderedItems")]
 
@@ -55,13 +56,24 @@ styleSheet = "<style>\
 .status__content { }\
 .status__media { width:100%; }\
 .status__image { max-width: 100%; width:100%; min-width:100%; }\
-body { background:#333; background-image: url('header.png'); background-size: cover; background-attachment: fixed; color: #fff1e8; line-height: 1.4;}\
+#header {background: rgba(0,0,0,0.75);text-align: center;padding-bottom: 16px;}\
+body { margin:0;background:#333; background-image: url('header.png'); background-size: cover; background-attachment: fixed; color: #fff1e8; line-height: 1.4;}\
 * {box-sizing: border-box;}\
 a { color: rgb(150,255,140) }\
 </style>"
-outfile.write("<!DOCTYPE html><html><head><title>Mastodon Archive</title><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>")
+outfile.write("<!DOCTYPE html><html>\
+	<head>\
+	<title>Mastodon Archive</title>\
+	<meta charset='UTF-8'>\
+	<meta name='viewport' content='width=device-width, initial-scale=1.0'>")
 outfile.write(styleSheet)
-outfile.write("</head><body>")
+outfile.write("</head><body>\
+	<section id='header'>\
+		<img src='avatar.png'>\
+		<div id=preferred-name>{0}</div>\
+		<a id=user-name>{1}</a>\
+		<div id='actor-summary'>{2}</div>\
+	</section>".format(actor.get("preferredUsername"), "@"+actor.get("name").split("@")[1], actor.get("summary")))
 for article in articles:
 	outfile.write(article)
 outfile.write("</body></html>")

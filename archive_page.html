@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Mastodon Archive</title>
+	<meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>
+	<style>
+		.status { width: 54ch;
+			position: relative;
+			min-height: 128px;
+			margin:auto auto 4em auto;
+			border: 1px solid #999;
+			border-radius: 16px;
+			padding:8px;
+			background: rgba(0,0,0,0.75);
+		}
+		.status::before{
+			content: url('avatar.png');
+			position: absolute; right: 100%;
+		}
+		.status__summary {
+			width: 100%;
+			background: #333
+		}
+		.status__summary::after {
+			content: '[Click to Open]';
+			display: block;
+		}
+		.status__date {
+			text-align: right;
+		}
+		.status__content { }
+		.status__media {
+			width:100%;
+		}
+		.status__image {
+			max-width: 100%; width:100%; min-width:100%;
+		}
+		.hidden {
+			display: none;
+		}
+		#header {
+			background: rgba(0,0,0,0.75);
+			text-align: center;
+			padding-bottom: 16px;
+		}
+		#help-text,
+		#error-text {
+			background: rgba(0,0,0,0.75);
+			padding: 24px;
+			text-align: center;
+			font-size: 1.1em
+		}
+		#error-text {
+			background: rgba(100,0,0,0.75);
+		}
+		body {
+			font-size: 1rem;
+			margin: 0;
+			background:#222;
+			background-image: url('header.png');
+			background-size: cover;
+			background-attachment: fixed;
+			color: #fff1e8;
+			line-height: 1.4;
+		}
+		* {
+			box-sizing: border-box;
+		}
+		a {
+			color: rgb(150,255,140)
+		}
+		button {
+			min-height: 44px;
+			min-width: 44px;
+			font-size: 1rem;
+		}
+	</style>
+	<template id="article">
+		<article class='status'>
+		<div class='status__date'><span ></span></div>
+		<div class='status__content'></div>
+		<div class='status__media'></div>
+		</article>
+	</template>
+	<template id="article--CW">
+		<article class='status'>
+		<div class='status__date'><span></span></div>
+		<details><summary class='status__summary'></summary>
+		<div class='status__content'></div>
+		<div class='status__media'></div>
+		</details>
+		</article>
+	</template>
+	<template id="media-video">
+		<video controls muted src='' class='status__media'>
+			There should be a video here.
+		</video>
+	</template>
+	<template id="media-image">
+		<img class='status__media' src=''>
+	</template>
+
+</head>
+<body>
+	<section id="header">
+		<img src="avatar.png">
+		<div id=preferred-name></div>
+		<a id=user-name></a>
+		<div id="actor-summary"></div>
+	</section>
+	<div id="help-text">
+		<h1>Attempting to process your archive...</h1>
+	</div>
+	<div id="error-text" class="hidden">
+		<h1>Failed to load the archive automatically.</h1>
+		<p>
+			That's still ok! You'll just need to select the file <b>outbox.json</b>
+			in your archive yourself to open it.
+		</p>
+		<button id="outbox-input">
+			<label>
+				Browse Your Files for outbox.json
+				<input accept="application/json" id="outbox-file-input" type="file" style="display:none">
+			</label>
+		</button>
+	</div>
+	<main id="articles">
+
+	</main>
+</body>
+<script>
+	'use strict'
+	// i'm both shocked that this works and shocked that the other things i tried didn't
+	var outboxXHR = new XMLHttpRequest(),
+		actorXHR = new XMLHttpRequest();
+	outboxXHR.addEventListener("load", function() {
+		var outbox = JSON.parse(this.response);
+		buildArchiveView(outbox);
+		document.getElementById("help-text").classList.toggle("hidden");
+	});
+	outboxXHR.addEventListener("error", function() {
+		document.getElementById("error-text").classList.toggle("hidden");
+		document.getElementById("help-text").classList.toggle("hidden");
+		document.getElementById("outbox-file-input")
+			.addEventListener("change", function(event) {
+				document.getElementById("error-text").classList.toggle("hidden");
+				document.getElementById("help-text").classList.toggle("hidden");
+				var file = event.target.files[0],
+					reader = new FileReader();
+				reader.addEventListener("load", function() {
+					var outbox = JSON.parse(this.result);
+					buildArchiveView(outbox);
+					document.getElementById("error-text").classList.add("hidden");
+					document.getElementById("help-text").classList.add("hidden");
+				});
+				reader.readAsText(file);
+			});
+	});
+	outboxXHR.open("GET", "./outbox.json");
+	outboxXHR.overrideMimeType("text/json; charset=utf-8");
+	outboxXHR.send();
+
+	// dont really care if this fails
+	actorXHR.addEventListener("load", function() {
+		var actor = JSON.parse(this.response);
+		document.getElementById("actor-summary")
+			.insertAdjacentHTML("afterbegin",actor.summary);
+		document.getElementById("preferred-name")
+			.insertAdjacentText("afterbegin",actor.preferredUsername)
+		document.getElementById("user-name")
+			.insertAdjacentText("afterbegin","@"+actor.name.split("@")[1]);
+	});
+	actorXHR.open("GET", "./actor.json");
+	actorXHR.overrideMimeType("text/json; charset=utf-8");
+	actorXHR.send();
+
+	function buildArchiveView(outbox) {
+		var articleTemplate = document.getElementById("article"),
+			articleCWTemplate = document.getElementById("article--CW"),
+			videoTemplate = document.getElementById("media-video"),
+			imageTemplate = document.getElementById("media-image");
+
+		var statuses = outbox.orderedItems.map(item => item.object)
+			.filter(object => typeof(object) === typeof({}));
+
+		statuses.forEach((status) => {
+			var attachmentUrls = status.attachment.map(media => media.url);
+			if (status.summary) {
+				var article = document.importNode(articleCWTemplate.content, true);
+				article.querySelector(".status__summary")
+					.insertAdjacentText("afterbegin", status.summary);
+			} else {
+				var article = document.importNode(articleTemplate.content, true);
+			}
+			article.querySelector(".status__date")
+				.insertAdjacentText("afterbegin", status.published);
+			article.querySelector(".status__content")
+				.insertAdjacentHTML("afterbegin", status.content);
+			if (attachmentUrls.length > 0) {
+				var mediaDiv = article.querySelector(".status__media");
+				attachmentUrls.forEach((url) => {
+					var extension = url.split(".").pop();
+					if (extension === "mp4") {
+						var media = document.importNode(videoTemplate.content, true);
+					} else {
+						var media = document.importNode(imageTemplate.content, true);
+					}
+					media.querySelector(".status__media").src = url.split("/media/").pop();
+					mediaDiv.appendChild(media);
+				});
+			}
+			document.getElementById("articles").appendChild(article);
+		});
+	}
+</script>
+</html>
