@@ -1,12 +1,12 @@
-# mastodon-archive-to-html
-A python script to take a mastodon archive and convert it into a human-readable webpage for viewing
+# Mastodon Archive Viewer
+A python script to take a mastodon archive and convert it into a human-readable webpage for viewing. Currently available as a python script or a hacky html file with some inline JS.
 
 # Features:
 * organizes your old posts into a conveniently readable timeline
 * includes media attachments in posts
 * Preserves content warnings/summaries
-* Uses the header from the archive as the background
-* Uses the avatar from the archive as the avatar next to your old posts
+* Tries to use the header from the archive as the background
+* Tries to use the avatar from the archive as the avatar next to your old posts
 
 # Usage
 <b>Without Python:</b>
