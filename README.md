@@ -14,6 +14,7 @@ A python script to take a mastodon archive and convert it into a human-readable 
 * * From the command line: `python3 html_from_archive.py`
 * * You can also set it as executable and run it directly or, on Windows, right click and open it with python 3.
 * Open the resulting `processed_archive.html` file in your web browser.
+
 <b>Without Python:</b>
 
 * Download the attached `archive_page.html` file and place it in the root of the archive (the folder that has `outbox.json` and `media_attachments` in it).
