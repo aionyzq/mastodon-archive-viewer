@@ -73,7 +73,7 @@ outfile.write("</head><body>\
 		<div id=preferred-name>{0}</div>\
 		<a id=user-name>{1}</a>\
 		<div id='actor-summary'>{2}</div>\
-	</section>".format(actor.get("preferredUsername"), "@"+actor.get("name").split("@")[1], actor.get("summary")))
+	</section>".format(actor.get("preferredUsername"), actor.get("name"), actor.get("summary")))
 for article in articles:
 	outfile.write(article)
 outfile.write("</body></html>")
